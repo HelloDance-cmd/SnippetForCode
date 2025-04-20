@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.codesnippetmanager.repository.UserRepository;
 import com.example.codesnippetmanager.entity.User;
-import com.example.codesnippetmanager.util.JwtUtil; // 新增：导入 JwtUtil 类
+import com.example.codesnippetmanager.util.JwtUtil;
 
 @RestController
 public class AuthController {
