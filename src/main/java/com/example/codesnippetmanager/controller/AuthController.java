@@ -1,25 +1,30 @@
-package com.example.demo.controller;
+package com.example.codesnippetmanager.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.entity.User;
+import com.example.codesnippetmanager.repository.UserRepository;
+import com.example.codesnippetmanager.entity.User;
+import com.example.codesnippetmanager.util.JwtUtil; // 新增：导入 JwtUtil 类
 
 @RestController
 public class AuthController {
-
     @Autowired
     private UserRepository userRepository;
 
     @PostMapping("/api/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
-        // 简单的硬编码验证逻辑，实际项目中应使用数据库或第三方认证服务
-        if ("admin".equals(request.getUsername()) && "password".equals(request.getPassword())) {
-            return new LoginResponse(true, "Login successful");
+        // 从数据库中查询用户信息
+        User user = userRepository.findByUsername(request.getUsername());
+        if (user != null && user.getPassword().equals(request.getPassword())) {
+            // 生成 JWT Token
+            String token = JwtUtil.generateToken(user.getUsername());
+            // 返回登录成功的响应，包含 token
+            return new LoginResponse(true, "Login successful", token);
         } else {
-            return new LoginResponse(false, "Invalid username or password");
+            // 返回登录失败的响应
+            return new LoginResponse(false, "Invalid username or password", null);
         }
     }
 
@@ -67,10 +72,12 @@ public class AuthController {
     public static class LoginResponse {
         private boolean success;
         private String message;
+        private String token;
 
-        public LoginResponse(boolean success, String message) {
+        public LoginResponse(boolean success, String message, String token) {
             this.success = success;
             this.message = message;
+            this.token = token;
         }
 
         // Getters and Setters
@@ -88,6 +95,14 @@ public class AuthController {
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
         }
     }
 
